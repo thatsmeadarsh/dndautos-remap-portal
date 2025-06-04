@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - DnD Autos ECU Remap Portal{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="bi bi-speedometer2"></i> ECU Remap Dashboard</h2>
+        <p class="text-muted">Welcome, {{ current_user.email }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if not current_user.is_admin %}
+        <a href="{{ url_for('submit') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Submit New ECU File
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="search-filters card">
+    <div class="card-body">
+        <h5 class="card-title mb-3"><i class="bi bi-search"></i> Search & Filter</h5>
+        <form id="search-form" method="get">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="search_reg" class="form-label">Registration Number</label>
+                    <input type="text" class="form-control" id="search_reg" name="reg" value="{{ request.args.get('reg', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="search_make" class="form-label">Vehicle Make</label>
+                    <input type="text" class="form-control" id="search_make" name="make" value="{{ request.args.get('make', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="search_date_from" class="form-label">Date From</label>
+                    <input type="date" class="form-control" id="search_date_from" name="date_from" value="{{ request.args.get('date_from', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="search_date_to" class="form-label">Date To</label>
+                    <input type="date" class="form-control" id="search_date_to" name="date_to" value="{{ request.args.get('date_to', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="search_status" class="form-label">Status</label>
+                    <select class="form-select" id="search_status" name="status">
+                        <option value="">All</option>
+                        <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if submissions|length == 0 %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No submissions found. {% if not current_user.is_admin %}<a href="{{ url_for('submit') }}">Submit a new ECU file</a>{% endif %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <div class="row">
+            <div class="col">
+                <h5 class="mb-0"><i class="bi bi-list"></i> Submissions ({{ submissions|length }})</h5>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Registration</th>
+                        <th>Vehicle</th>
+                        <th>File Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions_by_reg.values() %}
+                    <tr>
+                        <td>{{ submission.submitted_date }}</td>
+                        <td>{{ submission.registration_number }}</td>
+                        <td>{{ submission.vehicle_make }} {{ submission.vehicle_model }} ({{ submission.vehicle_year }})</td>
+                        <td>
+                            {{ submission.file_type|default('ECU')|upper }}
+                            {% if submission.get('resubmission_count', 0) > 0 %}
+                            <span class="badge bg-info ms-1" title="This vehicle has {{ submission.get('resubmission_count', 0) }} resubmission(s)">
+                                {{ submission.get('resubmission_count', 0) + 1 }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if submission.tuned_file %}
+                            <span class="badge bg-success">Completed</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('download', submission_id=submission.id, file_type='original') }}" class="btn btn-sm btn-outline-primary" title="Download Original File">
+                                    <i class="bi bi-download"></i> Original
+                                </a>
+                                <a href="{{ url_for('download', submission_id=submission.id, file_type='image') }}" class="btn btn-sm btn-outline-info" title="View Vehicle Image">
+                                    <i class="bi bi-image"></i> Image
+                                </a>
+                                
+                                {% if submission.tuned_file %}
+                                <a href="{{ url_for('download', submission_id=submission.id, file_type='tuned') }}" class="btn btn-sm btn-success" title="Download Tuned File">
+                                    <i class="bi bi-download"></i> Tuned
+                                </a>
+                                {% elif current_user.is_admin %}
+                                <a href="{{ url_for('upload_tuned', submission_id=submission.id) }}" class="btn btn-sm btn-warning" title="Upload Tuned File">
+                                    <i class="bi bi-upload"></i> Upload
+                                </a>
+                                {% endif %}
+                                
+                                {% if not current_user.is_admin and not submission.tuned_file %}
+                                <a href="{{ url_for('resubmit', submission_id=submission.id) }}" class="btn btn-sm btn-secondary" title="Resubmit Request">
+                                    <i class="bi bi-arrow-repeat"></i> Resubmit
+                                </a>
+                                {% endif %}
+                                
+                                <a href="{{ url_for('view_submission_details', submission_id=submission.id) }}" class="btn btn-sm btn-info" title="View Details">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                                
+                                {% if current_user.is_superadmin %}
+                                <form method="post" action="{{ url_for('delete_submission_route', submission_id=submission.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this submission? This action cannot be undone.');">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete Submission">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle search form submission
+    const searchForm = document.getElementById('search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            // Remove empty fields from the form submission
+            const formElements = Array.from(searchForm.elements);
+            formElements.forEach(element => {
+                if (element.value === '' && element.name) {
+                    element.disabled = true;
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

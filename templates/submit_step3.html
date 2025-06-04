@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Submit ECU File - Step 3 - DnD Autos ECU Remap Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-upload"></i> Submit Remapping Request - Step 3</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('submit_step3') }}" enctype="multipart/form-data">
+                    <!-- Hidden fields to carry over data from previous steps -->
+                    {% for key, value in form_data.items() %}
+                        {% if key != 'csrf_token' %}
+                            {% if value is iterable and value is not string %}
+                                {% for item in value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ item }}">
+                                {% endfor %}
+                            {% else %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-file-earmark"></i> Upload Files</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <label for="original_file" class="form-label">{{ file_type_label }} File</label>
+                            <input type="file" class="form-control" id="original_file" name="original_file" accept=".bin,.hex,.ori" required>
+                            <div class="form-text">Upload the original {{ file_type_label }} file read from the vehicle.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="vehicle_image" class="form-label">Vehicle Image</label>
+                            <input type="file" class="form-control" id="vehicle_image" name="vehicle_image" accept="image/*" required>
+                            <div class="form-text">Upload an image of the vehicle.</div>
+                            <div id="image-preview-container" class="mt-2"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-arrow-right"></i> Continue to Review
+                        </button>
+                        <a href="{{ url_for('submit_step2') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Solutions
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview image when selected
+    const imageInput = document.getElementById('vehicle_image');
+    const previewContainer = document.getElementById('image-preview-container');
+    
+    if (imageInput && previewContainer) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewContainer.innerHTML = `
+                        <div class="card mt-2">
+                            <div class="card-body p-2 text-center">
+                                <img src="${event.target.result}" class="img-fluid file-preview" alt="Vehicle Preview">
+                            </div>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

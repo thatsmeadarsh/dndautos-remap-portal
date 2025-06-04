@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Submit ECU File - Step 2 - DnD Autos ECU Remap Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-upload"></i> Submit Remapping Request - Step 2</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('submit_step2') }}" enctype="multipart/form-data">
+                    <!-- Hidden fields to carry over data from step 1 -->
+                    {% for key, value in form_data.items() %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endfor %}
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-sliders"></i> Solution</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tuning_option" id="no_tuning" value="no_tuning">
+                                <label class="form-check-label" for="no_tuning">
+                                    <strong>No tuning</strong>
+                                </label>
+                                <div class="form-text">This provides no increase in torque or power. It is intended to be combined with options below.</div>
+                            </div>
+                        </div>
+                        
+                        <div id="tuning_options" class="mb-3 ps-4 border-start">
+                            <div class="form-check">
+                                <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="stage1" value="stage1" checked>
+                                <label class="form-check-label" for="stage1">
+                                    <strong>Stage 1</strong> - $85
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="stage2" value="stage2">
+                                <label class="form-check-label" for="stage2">
+                                    <strong>Stage 2</strong> - $105
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="stage3" value="stage3">
+                                <label class="form-check-label" for="stage3">
+                                    <strong>Stage 3</strong> - $250
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="economy" value="economy">
+                                <label class="form-check-label" for="economy">
+                                    <strong>Economy</strong> - $82
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="original_file" value="original_file">
+                                <label class="form-check-label" for="original_file">
+                                    <strong>Original file request</strong> - $60
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-gear"></i> Free Options</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="free_options[]" id="dtc_disable" value="dtc_disable">
+                                <label class="form-check-label" for="dtc_disable">
+                                    Specific DTC disable
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="free_options[]" id="stop_automation" value="stop_automation">
+                                <label class="form-check-label" for="stop_automation">
+                                    Stop File Automation (Stop the BOT)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-currency-dollar"></i> Paid Options</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="paid_options[]" id="dpf_disable" value="dpf_disable">
+                                <label class="form-check-label" for="dpf_disable">
+                                    DPF/OFF Disable
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="paid_options[]" id="egr_disable" value="egr_disable">
+                                <label class="form-check-label" for="egr_disable">
+                                    EGR Disable
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="paid_options[]" id="speed_limiter" value="speed_limiter">
+                                <label class="form-check-label" for="speed_limiter">
+                                    Speed Limiter Disable
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="paid_options[]" id="sports_displays" value="sports_displays">
+                                <label class="form-check-label" for="sports_displays">
+                                    Sports Displays
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="paid_options[]" id="start_stop" value="start_stop">
+                                <label class="form-check-label" for="start_stop">
+                                    Start Stop Disable
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="paid_options[]" id="exhaust_flop" value="exhaust_flop">
+                                <label class="form-check-label" for="exhaust_flop">
+                                    Exhaust Flop Disable
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-chat-text"></i> Additional Comments</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <textarea class="form-control" id="comments" name="comments" rows="4" placeholder="Enter any additional requirements or information..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-arrow-right"></i> Continue to File Upload
+                        </button>
+                        <a href="{{ url_for('submit_step1') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Vehicle Information
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle tuning options based on "No tuning" selection
+    const noTuningRadio = document.getElementById('no_tuning');
+    const tuningOptions = document.getElementById('tuning_options');
+    const tuningRadios = document.querySelectorAll('.tuning-radio');
+    
+    function toggleTuningOptions() {
+        if (noTuningRadio.checked) {
+            tuningOptions.classList.add('text-muted');
+            tuningRadios.forEach(radio => {
+                radio.disabled = true;
+            });
+        } else {
+            tuningOptions.classList.remove('text-muted');
+            tuningRadios.forEach(radio => {
+                radio.disabled = false;
+            });
+        }
+    }
+    
+    noTuningRadio.addEventListener('change', toggleTuningOptions);
+    tuningRadios.forEach(radio => {
+        radio.addEventListener('change', toggleTuningOptions);
+    });
+    
+    // Initial check
+    toggleTuningOptions();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Submission Details - DnD Autos ECU Remap Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> Submission Details</h4>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5><i class="bi bi-car-front"></i> Vehicle Information</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Registration:</th>
+                                    <td>{{ submission.registration_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Make:</th>
+                                    <td>{{ submission.vehicle_make }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Model:</th>
+                                    <td>{{ submission.vehicle_model }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Year:</th>
+                                    <td>{{ submission.vehicle_year }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Submitted By:</th>
+                                    <td>{{ submission.submitted_by }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Submitted Date:</th>
+                                    <td>{{ submission.submitted_date }}</td>
+                                </tr>
+                                <tr>
+                                    <th>File Type:</th>
+                                    <td>{{ submission.get('file_type', 'ECU')|upper }}</td>
+                                </tr>
+                                {% if submission.get('file_type') == 'transmission' %}
+                                <tr>
+                                    <th>Transmission Type:</th>
+                                    <td>{{ submission.get('transmission_type', '')|capitalize }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>ECU Type:</th>
+                                    <td>{{ submission.ecu_type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tool Type:</th>
+                                    <td>{{ submission.get('tool_type', 'Slave')|capitalize }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if submission.get('tuning_option') or submission.get('free_options') or submission.get('paid_options') %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-sliders"></i> Selected Solutions</h5>
+                    <hr>
+                    {% if submission.get('tuning_option') %}
+                    <p><strong>Tuning Option:</strong> 
+                        {% if submission.tuning_option == 'no_tuning' %}
+                            No Tuning
+                        {% elif submission.tuning_option == 'stage1' %}
+                            Stage 1 - $85
+                        {% elif submission.tuning_option == 'stage2' %}
+                            Stage 2 - $105
+                        {% elif submission.tuning_option == 'stage3' %}
+                            Stage 3 - $250
+                        {% elif submission.tuning_option == 'economy' %}
+                            Economy - $82
+                        {% elif submission.tuning_option == 'original_file' %}
+                            Original File Request - $60
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Free Options:</h6>
+                            <ul>
+                                {% if submission.get('free_options') %}
+                                    {% for option in submission.free_options %}
+                                        {% if option == 'dtc_disable' %}
+                                        <li>Specific DTC disable</li>
+                                        {% elif option == 'stop_automation' %}
+                                        <li>Stop File Automation (Stop the BOT)</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                <li class="text-muted">None selected</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Paid Options:</h6>
+                            <ul>
+                                {% if submission.get('paid_options') %}
+                                    {% for option in submission.paid_options %}
+                                        {% if option == 'dpf_disable' %}
+                                        <li>DPF/OFF Disable</li>
+                                        {% elif option == 'egr_disable' %}
+                                        <li>EGR Disable</li>
+                                        {% elif option == 'speed_limiter' %}
+                                        <li>Speed Limiter Disable</li>
+                                        {% elif option == 'sports_displays' %}
+                                        <li>Sports Displays</li>
+                                        {% elif option == 'start_stop' %}
+                                        <li>Start Stop Disable</li>
+                                        {% elif option == 'exhaust_flop' %}
+                                        <li>Exhaust Flop Disable</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                <li class="text-muted">None selected</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if submission.get('comments') %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-chat-text"></i> Additional Comments</h5>
+                    <hr>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <p class="mb-0">{{ submission.comments }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if submission.get('resubmission') %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-arrow-repeat"></i> Resubmission Information</h5>
+                    <hr>
+                    <div class="alert alert-info">
+                        <p><strong>This is a resubmission.</strong> Original submission date: {{ submission.get('original_submission_date', 'Unknown') }}</p>
+                        {% if submission.get('original_submission_id') %}
+                        <p><a href="{{ url_for('view_submission_details', submission_id=submission.original_submission_id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-clock-history"></i> View Original Submission
+                        </a></p>
+                        {% endif %}
+                        {% if submission.get('resubmission_notes') %}
+                        <p><strong>Resubmission Notes:</strong> {{ submission.resubmission_notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if submissions_with_same_reg|length > 1 %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-clock-history"></i> All Submissions for this Vehicle</h5>
+                    <hr>
+                    <div class="list-group">
+                        {% for related in submissions_with_same_reg %}
+                        <a href="{{ url_for('view_submission_details', submission_id=related.id) }}" 
+                           class="list-group-item list-group-item-action {% if related.id == submission.id %}active{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ related.submitted_date }}</h6>
+                                <span class="badge {% if related.tuned_file %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {% if related.tuned_file %}Completed{% else %}Pending{% endif %}
+                                </span>
+                            </div>
+                            <p class="mb-1">{{ related.get('file_type', 'ECU')|upper }} File{% if related.get('resubmission') %} (Resubmission){% endif %}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mb-4">
+                    <h5><i class="bi bi-file-earmark"></i> Files</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Original {{ submission.get('file_type', 'ECU')|upper }} File</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p><i class="bi bi-file-earmark-binary fs-1 text-primary"></i></p>
+                                    <p>{{ submission.original_filename }}</p>
+                                    <a href="{{ url_for('download', submission_id=submission.id, file_type='original') }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-download"></i> Download Original File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">ECU Image</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p><i class="bi bi-image fs-1 text-info"></i></p>
+                                    <p>{{ submission.image_filename }}</p>
+                                    <a href="{{ url_for('download', submission_id=submission.id, file_type='image') }}" class="btn btn-outline-info">
+                                        <i class="bi bi-eye"></i> View Image
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if submission.get('tuned_file') %}
+                    <div class="row">
+                        <div class="col-md-6 offset-md-3">
+                            <div class="card mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">Tuned File</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p><i class="bi bi-file-earmark-check fs-1 text-success"></i></p>
+                                    <p>{{ submission.tuned_file.filename }}</p>
+                                    <p><small class="text-muted">Uploaded on {{ submission.tuned_date }}</small></p>
+                                    <a href="{{ url_for('download', submission_id=submission.id, file_type='tuned') }}" class="btn btn-success">
+                                        <i class="bi bi-download"></i> Download Tuned File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif current_user.is_admin %}
+                    <div class="row">
+                        <div class="col-md-6 offset-md-3">
+                            <div class="card mb-3">
+                                <div class="card-header bg-warning">
+                                    <h6 class="mb-0">Upload Tuned File</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p><i class="bi bi-upload fs-1 text-warning"></i></p>
+                                    <p>No tuned file has been uploaded yet.</p>
+                                    <a href="{{ url_for('upload_tuned', submission_id=submission.id) }}" class="btn btn-warning">
+                                        <i class="bi bi-upload"></i> Upload Tuned File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Submit ECU File - Step 1 - DnD Autos ECU Remap Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-upload"></i> Submit Remapping Request - Step 1</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('submit_step1') }}" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <h5><i class="bi bi-car-front"></i> Vehicle Information</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <label for="registration_number" class="form-label">Vehicle Registration Number</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="registration_number" name="registration_number" placeholder="e.g. MH02AB1234" required>
+                                <button class="btn btn-outline-secondary" type="button" id="lookup_vehicle">Lookup</button>
+                            </div>
+                            <div class="form-text">Enter the vehicle registration number to auto-fill details.</div>
+                        </div>
+                        
+                        <div id="lookup_result" class="alert d-none"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="vehicle_make" class="form-label">Vehicle Make</label>
+                                <select class="form-select" id="vehicle_make" name="vehicle_make" required>
+                                    <option value="">Select Make</option>
+                                    <!-- Options will be populated by JavaScript -->
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="vehicle_model" class="form-label">Vehicle Model</label>
+                                <select class="form-select" id="vehicle_model" name="vehicle_model" required>
+                                    <option value="">Select Model</option>
+                                    <!-- Options will be populated by JavaScript -->
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="vehicle_year" class="form-label">Vehicle Year</label>
+                                <input type="number" class="form-control" id="vehicle_year" name="vehicle_year" min="1990" max="2030" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-cpu"></i> File Type</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="file_type" id="file_type_ecu" value="ecu" checked>
+                                <label class="form-check-label" for="file_type_ecu">
+                                    ECU File
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="file_type" id="file_type_transmission" value="transmission">
+                                <label class="form-check-label" for="file_type_transmission">
+                                    Transmission File
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="transmission_options" class="mb-3 ps-4 border-start" style="display: none;">
+                            <label class="form-label">Transmission Type</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="transmission_type" id="transmission_auto" value="automatic">
+                                <label class="form-check-label" for="transmission_auto">
+                                    Automatic
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="transmission_type" id="transmission_manual" value="manual">
+                                <label class="form-check-label" for="transmission_manual">
+                                    Manual
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-tools"></i> Tool Information</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <label class="form-label">Tool Type</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tool_type" id="tool_slave" value="slave" checked>
+                                <label class="form-check-label" for="tool_slave">
+                                    Slave Tool
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tool_type" id="tool_master" value="master">
+                                <label class="form-check-label" for="tool_master">
+                                    Master Tool
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ecu_type" class="form-label">ECU Type</label>
+                            <input type="text" class="form-control" id="ecu_type" name="ecu_type" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="professional_declaration" name="professional_declaration" required>
+                            <label class="form-check-label" for="professional_declaration">
+                                <strong>I hereby declare that I am a professional.</strong>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-arrow-right"></i> Continue to Solutions
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/vehicle-api.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle transmission options based on file type selection
+    const fileTypeEcu = document.getElementById('file_type_ecu');
+    const fileTypeTransmission = document.getElementById('file_type_transmission');
+    const transmissionOptions = document.getElementById('transmission_options');
+    
+    function toggleTransmissionOptions() {
+        if (fileTypeTransmission.checked) {
+            transmissionOptions.style.display = 'block';
+        } else {
+            transmissionOptions.style.display = 'none';
+            // Uncheck transmission type options
+            document.getElementById('transmission_auto').checked = false;
+            document.getElementById('transmission_manual').checked = false;
+        }
+    }
+    
+    fileTypeEcu.addEventListener('change', toggleTransmissionOptions);
+    fileTypeTransmission.addEventListener('change', toggleTransmissionOptions);
+});
+</script>
+{% endblock %}

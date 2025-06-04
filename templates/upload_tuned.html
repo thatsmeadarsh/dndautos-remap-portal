@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Tuned File - DnD Autos ECU Remap Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-upload"></i> Upload Tuned ECU File</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5><i class="bi bi-info-circle"></i> Submission Details</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Registration:</th>
+                                    <td>{{ submission.registration_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Vehicle:</th>
+                                    <td>{{ submission.vehicle_make }} {{ submission.vehicle_model }} ({{ submission.vehicle_year }})</td>
+                                </tr>
+                                <tr>
+                                    <th>ECU Type:</th>
+                                    <td>{{ submission.ecu_type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Submitted By:</th>
+                                    <td>{{ submission.submitted_by }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Submitted Date:</th>
+                                    <td>{{ submission.submitted_date }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Notes</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if submission.notes %}
+                                    <p>{{ submission.notes }}</p>
+                                    {% else %}
+                                    <p class="text-muted">No additional notes provided.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5><i class="bi bi-file-earmark"></i> Files</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Original ECU File</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p><i class="bi bi-file-earmark-binary fs-1 text-primary"></i></p>
+                                    <p>{{ submission.original_filename }}</p>
+                                    <a href="{{ url_for('download', submission_id=submission.id, file_type='original') }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-download"></i> Download Original File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Vehicle Image</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p><i class="bi bi-image fs-1 text-info"></i></p>
+                                    <p>{{ submission.image_filename }}</p>
+                                    <a href="{{ url_for('download', submission_id=submission.id, file_type='image') }}" class="btn btn-outline-info">
+                                        <i class="bi bi-eye"></i> View Image
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <h5><i class="bi bi-upload"></i> Upload Tuned File</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <label for="tuned_file" class="form-label">Tuned ECU File</label>
+                            <input type="file" class="form-control" id="tuned_file" name="tuned_file" accept=".bin,.hex,.tun" required>
+                            <div class="form-text">Upload the tuned ECU file for the customer.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-upload"></i> Upload Tuned File
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

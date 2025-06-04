@@ -1,0 +1,687 @@
+{% extends "base.html" %}
+
+{% block title %}Submit ECU File - DnD Autos ECU Remap Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-upload"></i> Submit Remapping Request</h4>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="submissionTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="vehicle-tab" data-bs-toggle="tab" data-bs-target="#vehicle" type="button" role="tab" aria-controls="vehicle" aria-selected="true">
+                            <i class="bi bi-car-front"></i> Vehicle Information
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="solution-tab" data-bs-toggle="tab" data-bs-target="#solution" type="button" role="tab" aria-controls="solution" aria-selected="false" disabled>
+                            <i class="bi bi-sliders"></i> Solution
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-controls="files" aria-selected="false" disabled>
+                            <i class="bi bi-file-earmark"></i> Files
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab" aria-controls="review" aria-selected="false" disabled>
+                            <i class="bi bi-check-circle"></i> Review
+                        </button>
+                    </li>
+                </ul>
+                
+                <form id="submissionForm" method="post" enctype="multipart/form-data">
+                    <div class="tab-content p-3 border border-top-0 rounded-bottom" id="submissionTabsContent">
+                        <!-- Vehicle Information Tab -->
+                        <div class="tab-pane fade show active" id="vehicle" role="tabpanel" aria-labelledby="vehicle-tab">
+                            <div class="mb-3">
+                                <label for="registration_number" class="form-label">Vehicle Registration Number</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="registration_number" name="registration_number" placeholder="e.g. MH02AB1234" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="lookup_vehicle">Lookup</button>
+                                </div>
+                                <div class="form-text">Enter the vehicle registration number to auto-fill details.</div>
+                            </div>
+                            
+                            <div id="lookup_result" class="alert d-none"></div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="vehicle_make" class="form-label">Vehicle Make</label>
+                                    <select class="form-select" id="vehicle_make" name="vehicle_make" required>
+                                        <option value="">Select Make</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="vehicle_model" class="form-label">Vehicle Model</label>
+                                    <select class="form-select" id="vehicle_model" name="vehicle_model" required>
+                                        <option value="">Select Model</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="vehicle_year" class="form-label">Vehicle Year</label>
+                                    <input type="number" class="form-control" id="vehicle_year" name="vehicle_year" min="1990" max="2030" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="file_type" id="file_type_ecu" value="ecu" checked>
+                                    <label class="form-check-label" for="file_type_ecu">
+                                        ECU File
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="file_type" id="file_type_transmission" value="transmission">
+                                    <label class="form-check-label" for="file_type_transmission">
+                                        Transmission File
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="transmission_options" class="mb-3 ps-4 border-start" style="display: none;">
+                                <label class="form-label">Transmission Type</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="transmission_type" id="transmission_auto" value="automatic">
+                                    <label class="form-check-label" for="transmission_auto">
+                                        Automatic
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="transmission_type" id="transmission_manual" value="manual">
+                                    <label class="form-check-label" for="transmission_manual">
+                                        Manual
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Tool Type</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tool_type" id="tool_slave" value="slave" checked>
+                                    <label class="form-check-label" for="tool_slave">
+                                        Slave Tool
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tool_type" id="tool_master" value="master">
+                                    <label class="form-check-label" for="tool_master">
+                                        Master Tool
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="ecu_type" class="form-label">ECU Type</label>
+                                <input type="text" class="form-control" id="ecu_type" name="ecu_type" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="professional_declaration" name="professional_declaration" required>
+                                    <label class="form-check-label" for="professional_declaration">
+                                        <strong>I hereby declare that I am a professional.</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-primary next-tab">Next <i class="bi bi-arrow-right"></i></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Solution Tab -->
+                        <div class="tab-pane fade" id="solution" role="tabpanel" aria-labelledby="solution-tab">
+                            <div class="mb-3">
+                                <h5>Solution</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tuning_option" id="no_tuning" value="no_tuning">
+                                    <label class="form-check-label" for="no_tuning">
+                                        <strong>No tuning</strong>
+                                    </label>
+                                    <div class="form-text">This provides no increase in torque or power. It is intended to be combined with options below.</div>
+                                </div>
+                            </div>
+                            
+                            <div id="tuning_options" class="mb-3 ps-4 border-start">
+                                <div class="form-check">
+                                    <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="stage1" value="stage1" checked>
+                                    <label class="form-check-label" for="stage1">
+                                        <strong>Stage 1</strong> - $85
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="stage2" value="stage2">
+                                    <label class="form-check-label" for="stage2">
+                                        <strong>Stage 2</strong> - $105
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="stage3" value="stage3">
+                                    <label class="form-check-label" for="stage3">
+                                        <strong>Stage 3</strong> - $250
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="economy" value="economy">
+                                    <label class="form-check-label" for="economy">
+                                        <strong>Economy</strong> - $82
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input tuning-radio" type="radio" name="tuning_option" id="original_file" value="original_file">
+                                    <label class="form-check-label" for="original_file">
+                                        <strong>Original file request</strong> - $60
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Free Options</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="free_options[]" id="dtc_disable" value="dtc_disable">
+                                    <label class="form-check-label" for="dtc_disable">
+                                        Specific DTC disable
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="free_options[]" id="stop_automation" value="stop_automation">
+                                    <label class="form-check-label" for="stop_automation">
+                                        Stop File Automation (Stop the BOT)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Paid Options</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="paid_options[]" id="dpf_disable" value="dpf_disable">
+                                    <label class="form-check-label" for="dpf_disable">
+                                        DPF/OFF Disable
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="paid_options[]" id="egr_disable" value="egr_disable">
+                                    <label class="form-check-label" for="egr_disable">
+                                        EGR Disable
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="paid_options[]" id="speed_limiter" value="speed_limiter">
+                                    <label class="form-check-label" for="speed_limiter">
+                                        Speed Limiter Disable
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="paid_options[]" id="sports_displays" value="sports_displays">
+                                    <label class="form-check-label" for="sports_displays">
+                                        Sports Displays
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="paid_options[]" id="start_stop" value="start_stop">
+                                    <label class="form-check-label" for="start_stop">
+                                        Start Stop Disable
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="paid_options[]" id="exhaust_flop" value="exhaust_flop">
+                                    <label class="form-check-label" for="exhaust_flop">
+                                        Exhaust Flop Disable
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="comments" class="form-label">Additional Comments</label>
+                                <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary prev-tab"><i class="bi bi-arrow-left"></i> Previous</button>
+                                <button type="button" class="btn btn-primary next-tab">Next <i class="bi bi-arrow-right"></i></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Files Tab -->
+                        <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
+                            <div class="mb-3">
+                                <label for="original_file" class="form-label">ECU/Transmission File</label>
+                                <input type="file" class="form-control" id="original_file" name="original_file" accept=".bin,.hex,.ori" required>
+                                <div class="form-text">Upload the original file read from the vehicle.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="vehicle_image" class="form-label">ECU Image</label>
+                                <input type="file" class="form-control" id="vehicle_image" name="vehicle_image" accept="image/*" required>
+                                <div class="form-text">Upload an image of the ECU.</div>
+                                <div id="image-preview-container" class="mt-2"></div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary prev-tab"><i class="bi bi-arrow-left"></i> Previous</button>
+                                <button type="button" class="btn btn-primary next-tab">Next <i class="bi bi-arrow-right"></i></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Review Tab -->
+                        <div class="tab-pane fade" id="review" role="tabpanel" aria-labelledby="review-tab">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Please review your submission details below before submitting.
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Vehicle Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Registration:</strong> <span id="review-reg"></span></p>
+                                        <p><strong>Make:</strong> <span id="review-make"></span></p>
+                                        <p><strong>Model:</strong> <span id="review-model"></span></p>
+                                        <p><strong>Year:</strong> <span id="review-year"></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>File Type:</strong> <span id="review-file-type"></span></p>
+                                        <p id="review-transmission-type-container"><strong>Transmission Type:</strong> <span id="review-transmission-type"></span></p>
+                                        <p><strong>Tool Type:</strong> <span id="review-tool-type"></span></p>
+                                        <p><strong>ECU Type:</strong> <span id="review-ecu-type"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Selected Solutions</h5>
+                                <p><strong>Tuning Option:</strong> <span id="review-tuning-option"></span></p>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Free Options:</h6>
+                                        <ul id="review-free-options"></ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Paid Options:</h6>
+                                        <ul id="review-paid-options"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3" id="review-comments-container">
+                                <h5>Additional Comments</h5>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <p class="mb-0" id="review-comments"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Files</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>ECU/Transmission File:</strong> <span id="review-original-file"></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>ECU Image:</strong> <span id="review-vehicle-image"></span></p>
+                                        <div id="review-image-preview"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary prev-tab"><i class="bi bi-arrow-left"></i> Previous</button>
+                                <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Submit Request</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/vehicle-api.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab navigation
+    const tabs = ['vehicle', 'solution', 'files', 'review'];
+    const tabButtons = document.querySelectorAll('.nav-link');
+    
+    // Next button handlers
+    document.querySelectorAll('.next-tab').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Find the current tab
+            const currentTab = this.closest('.tab-pane');
+            const currentTabId = currentTab.id;
+            const currentIndex = tabs.indexOf(currentTabId);
+            
+            // Validate current tab
+            if (!validateTab(currentTabId)) {
+                return;
+            }
+            
+            // Enable and show next tab
+            const nextTabId = tabs[currentIndex + 1];
+            const nextTabButton = document.querySelector(`[data-bs-target="#${nextTabId}"]`);
+            nextTabButton.disabled = false;
+            
+            // If moving to review tab, populate review data
+            if (nextTabId === 'review') {
+                populateReviewTab();
+            }
+            
+            // Use Bootstrap's tab API correctly
+            nextTabButton.click();
+        });
+    });
+    
+    // Previous button handlers
+    document.querySelectorAll('.prev-tab').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Find the current tab
+            const currentTab = this.closest('.tab-pane');
+            const currentTabId = currentTab.id;
+            const currentIndex = tabs.indexOf(currentTabId);
+            
+            // Show previous tab
+            const prevTabId = tabs[currentIndex - 1];
+            const prevTabButton = document.querySelector(`[data-bs-target="#${prevTabId}"]`);
+            prevTabButton.click();
+        });
+    });
+    
+    // Toggle transmission options based on file type selection
+    const fileTypeEcu = document.getElementById('file_type_ecu');
+    const fileTypeTransmission = document.getElementById('file_type_transmission');
+    const transmissionOptions = document.getElementById('transmission_options');
+    
+    function toggleTransmissionOptions() {
+        if (fileTypeTransmission.checked) {
+            transmissionOptions.style.display = 'block';
+        } else {
+            transmissionOptions.style.display = 'none';
+            // Uncheck transmission type options
+            document.getElementById('transmission_auto').checked = false;
+            document.getElementById('transmission_manual').checked = false;
+        }
+    }
+    
+    fileTypeEcu.addEventListener('change', toggleTransmissionOptions);
+    fileTypeTransmission.addEventListener('change', toggleTransmissionOptions);
+    
+    // Toggle tuning options based on "No tuning" selection
+    const noTuningRadio = document.getElementById('no_tuning');
+    const tuningOptions = document.getElementById('tuning_options');
+    const tuningRadios = document.querySelectorAll('.tuning-radio');
+    
+    function toggleTuningOptions() {
+        if (noTuningRadio.checked) {
+            tuningOptions.classList.add('text-muted');
+            tuningRadios.forEach(radio => {
+                radio.disabled = true;
+                radio.checked = false;
+            });
+        } else {
+            tuningOptions.classList.remove('text-muted');
+            tuningRadios.forEach(radio => {
+                radio.disabled = false;
+            });
+            // If no option is selected, select the first one by default
+            if (!Array.from(tuningRadios).some(r => r.checked)) {
+                tuningRadios[0].checked = true;
+            }
+        }
+    }
+    
+    // Add a separate button to toggle No Tuning off
+    const noTuningLabel = document.querySelector('label[for="no_tuning"]');
+    const toggleButton = document.createElement('button');
+    toggleButton.type = 'button';
+    toggleButton.className = 'btn btn-sm btn-outline-secondary ms-2';
+    toggleButton.innerHTML = '<i class="bi bi-x"></i> Clear';
+    toggleButton.style.display = 'none';
+    noTuningLabel.parentNode.insertBefore(toggleButton, noTuningLabel.nextSibling);
+    
+    // Show/hide toggle button based on No Tuning state
+    function updateToggleButton() {
+        toggleButton.style.display = noTuningRadio.checked ? 'inline-block' : 'none';
+    }
+    
+    // Handle toggle button click
+    toggleButton.addEventListener('click', function() {
+        noTuningRadio.checked = false;
+        tuningRadios[0].checked = true;
+        toggleTuningOptions();
+        updateToggleButton();
+    });
+    
+    // Update button visibility when No Tuning changes
+    noTuningRadio.addEventListener('change', updateToggleButton);
+    
+    noTuningRadio.addEventListener('change', toggleTuningOptions);
+    tuningRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                noTuningRadio.checked = false;
+            }
+        });
+    });
+    
+    // Preview image when selected
+    const imageInput = document.getElementById('vehicle_image');
+    const previewContainer = document.getElementById('image-preview-container');
+    
+    if (imageInput && previewContainer) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewContainer.innerHTML = `
+                        <div class="card mt-2">
+                            <div class="card-body p-2 text-center">
+                                <img src="${event.target.result}" class="img-fluid file-preview" alt="ECU Preview">
+                            </div>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '';
+            }
+        });
+    }
+    
+    // Validate tab content
+    function validateTab(tabId) {
+        const tab = document.getElementById(tabId);
+        const inputs = tab.querySelectorAll('input[required], select[required], textarea[required]');
+        let valid = true;
+        
+        inputs.forEach(input => {
+            if (!input.value) {
+                input.classList.add('is-invalid');
+                valid = false;
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        // Special validation for transmission type
+        if (tabId === 'vehicle' && fileTypeTransmission.checked) {
+            const transmissionSelected = document.getElementById('transmission_auto').checked || 
+                                        document.getElementById('transmission_manual').checked;
+            if (!transmissionSelected) {
+                document.getElementById('transmission_auto').classList.add('is-invalid');
+                document.getElementById('transmission_manual').classList.add('is-invalid');
+                valid = false;
+            }
+        }
+        
+        // Special validation for professional declaration
+        if (tabId === 'vehicle') {
+            const professionalDeclaration = document.getElementById('professional_declaration');
+            if (!professionalDeclaration.checked) {
+                professionalDeclaration.classList.add('is-invalid');
+                valid = false;
+            } else {
+                professionalDeclaration.classList.remove('is-invalid');
+            }
+        }
+        
+        if (!valid) {
+            alert('Please fill in all required fields before proceeding.');
+        }
+        
+        return valid;
+    }
+    
+    // Populate review tab with form data
+    function populateReviewTab() {
+        // Vehicle information
+        document.getElementById('review-reg').textContent = document.getElementById('registration_number').value;
+        document.getElementById('review-make').textContent = document.getElementById('vehicle_make').value;
+        document.getElementById('review-model').textContent = document.getElementById('vehicle_model').value;
+        document.getElementById('review-year').textContent = document.getElementById('vehicle_year').value;
+        
+        // File type
+        const fileType = document.getElementById('file_type_ecu').checked ? 'ECU File' : 'Transmission File';
+        document.getElementById('review-file-type').textContent = fileType;
+        
+        // Transmission type
+        const transmissionTypeContainer = document.getElementById('review-transmission-type-container');
+        if (document.getElementById('file_type_transmission').checked) {
+            transmissionTypeContainer.style.display = 'block';
+            const transmissionType = document.getElementById('transmission_auto').checked ? 'Automatic' : 'Manual';
+            document.getElementById('review-transmission-type').textContent = transmissionType;
+        } else {
+            transmissionTypeContainer.style.display = 'none';
+        }
+        
+        // Tool type
+        const toolType = document.getElementById('tool_slave').checked ? 'Slave Tool' : 'Master Tool';
+        document.getElementById('review-tool-type').textContent = toolType;
+        
+        // ECU type
+        document.getElementById('review-ecu-type').textContent = document.getElementById('ecu_type').value;
+        
+        // Tuning option
+        let tuningOption = '';
+        if (document.getElementById('no_tuning').checked) {
+            tuningOption = 'No Tuning';
+        } else if (document.getElementById('stage1').checked) {
+            tuningOption = 'Stage 1 - $85';
+        } else if (document.getElementById('stage2').checked) {
+            tuningOption = 'Stage 2 - $105';
+        } else if (document.getElementById('stage3').checked) {
+            tuningOption = 'Stage 3 - $250';
+        } else if (document.getElementById('economy').checked) {
+            tuningOption = 'Economy - $82';
+        } else if (document.getElementById('original_file').checked) {
+            tuningOption = 'Original File Request - $60';
+        }
+        document.getElementById('review-tuning-option').textContent = tuningOption;
+        
+        // Free options
+        const freeOptionsList = document.getElementById('review-free-options');
+        freeOptionsList.innerHTML = '';
+        const freeOptions = [];
+        if (document.getElementById('dtc_disable').checked) {
+            freeOptions.push('Specific DTC disable');
+        }
+        if (document.getElementById('stop_automation').checked) {
+            freeOptions.push('Stop File Automation (Stop the BOT)');
+        }
+        
+        if (freeOptions.length > 0) {
+            freeOptions.forEach(option => {
+                const li = document.createElement('li');
+                li.textContent = option;
+                freeOptionsList.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = 'None selected';
+            li.className = 'text-muted';
+            freeOptionsList.appendChild(li);
+        }
+        
+        // Paid options
+        const paidOptionsList = document.getElementById('review-paid-options');
+        paidOptionsList.innerHTML = '';
+        const paidOptions = [];
+        if (document.getElementById('dpf_disable').checked) {
+            paidOptions.push('DPF/OFF Disable');
+        }
+        if (document.getElementById('egr_disable').checked) {
+            paidOptions.push('EGR Disable');
+        }
+        if (document.getElementById('speed_limiter').checked) {
+            paidOptions.push('Speed Limiter Disable');
+        }
+        if (document.getElementById('sports_displays').checked) {
+            paidOptions.push('Sports Displays');
+        }
+        if (document.getElementById('start_stop').checked) {
+            paidOptions.push('Start Stop Disable');
+        }
+        if (document.getElementById('exhaust_flop').checked) {
+            paidOptions.push('Exhaust Flop Disable');
+        }
+        
+        if (paidOptions.length > 0) {
+            paidOptions.forEach(option => {
+                const li = document.createElement('li');
+                li.textContent = option;
+                paidOptionsList.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = 'None selected';
+            li.className = 'text-muted';
+            paidOptionsList.appendChild(li);
+        }
+        
+        // Comments
+        const comments = document.getElementById('comments').value;
+        const commentsContainer = document.getElementById('review-comments-container');
+        if (comments) {
+            commentsContainer.style.display = 'block';
+            document.getElementById('review-comments').textContent = comments;
+        } else {
+            commentsContainer.style.display = 'none';
+        }
+        
+        // Files
+        const originalFileInput = document.getElementById('original_file');
+        const originalFile = originalFileInput && originalFileInput.files && originalFileInput.files.length > 0 ? originalFileInput.files[0] : null;
+        document.getElementById('review-original-file').textContent = originalFile ? originalFile.name : 'No file selected';
+        
+        const vehicleImageInput = document.getElementById('vehicle_image');
+        const vehicleImage = vehicleImageInput && vehicleImageInput.files && vehicleImageInput.files.length > 0 ? vehicleImageInput.files[0] : null;
+        document.getElementById('review-vehicle-image').textContent = vehicleImage ? vehicleImage.name : 'No image selected';
+        
+        // Image preview
+        const reviewImagePreview = document.getElementById('review-image-preview');
+        if (vehicleImage) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                reviewImagePreview.innerHTML = `
+                    <div class="card mt-2">
+                        <div class="card-body p-2 text-center">
+                            <img src="${event.target.result}" class="img-fluid file-preview" alt="ECU Preview">
+                        </div>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(vehicleImage);
+        } else {
+            reviewImagePreview.innerHTML = '';
+        }
+    }
+});
+</script>
+{% endblock %}
