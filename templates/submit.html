@@ -346,6 +346,37 @@
 <script src="{{ url_for('static', filename='js/vehicle-api.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Registration number validation
+    function validateRegistrationNumber(regNumber) {
+        // Remove spaces, hyphens and other special characters
+        const normalized = regNumber.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        
+        // Check if it matches the expected format (letters-numbers-letters-numbers)
+        // This is a simplified pattern for Indian registration numbers
+        const pattern = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{1,4}$/;
+        return pattern.test(normalized);
+    }
+
+    // Add validation to the registration number field
+    const regNumberInput = document.getElementById('registration_number');
+    regNumberInput.addEventListener('blur', function() {
+        const value = this.value.trim();
+        if (value && !validateRegistrationNumber(value)) {
+            this.classList.add('is-invalid');
+            if (!this.nextElementSibling || !this.nextElementSibling.classList.contains('invalid-feedback')) {
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = 'Please enter a valid registration number (e.g., KL20P8863)';
+                this.parentNode.insertBefore(feedback, this.nextSibling);
+            }
+        } else {
+            this.classList.remove('is-invalid');
+            const feedback = this.nextElementSibling;
+            if (feedback && feedback.classList && feedback.classList.contains('invalid-feedback')) {
+                feedback.remove();
+            }
+        }
+    });
     // Tab navigation
     const tabs = ['vehicle', 'solution', 'files', 'review'];
     const tabButtons = document.querySelectorAll('.nav-link');
@@ -517,6 +548,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!transmissionSelected) {
                 document.getElementById('transmission_auto').classList.add('is-invalid');
                 document.getElementById('transmission_manual').classList.add('is-invalid');
+                valid = false;
+            }
+        }
+        
+        // Special validation for registration number format
+        if (tabId === 'vehicle') {
+            const regNumber = document.getElementById('registration_number').value;
+            if (regNumber && !validateRegistrationNumber(regNumber)) {
+                document.getElementById('registration_number').classList.add('is-invalid');
                 valid = false;
             }
         }
