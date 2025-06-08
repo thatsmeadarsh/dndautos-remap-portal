@@ -356,6 +356,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const pattern = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{1,4}$/;
         return pattern.test(normalized);
     }
+    
+    // Year validation
+    function validateYear(year) {
+        const currentYear = new Date().getFullYear();
+        const yearNum = parseInt(year);
+        return yearNum >= 1990 && yearNum <= currentYear + 1;
+    }
 
     // Add validation to the registration number field
     const regNumberInput = document.getElementById('registration_number');
@@ -367,6 +374,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 const feedback = document.createElement('div');
                 feedback.className = 'invalid-feedback';
                 feedback.textContent = 'Please enter a valid registration number (e.g., KL20P8863)';
+                this.parentNode.insertBefore(feedback, this.nextSibling);
+            }
+        } else {
+            this.classList.remove('is-invalid');
+            const feedback = this.nextElementSibling;
+            if (feedback && feedback.classList && feedback.classList.contains('invalid-feedback')) {
+                feedback.remove();
+            }
+        }
+    });
+    
+    // Add validation to the year field
+    const yearInput = document.getElementById('vehicle_year');
+    yearInput.addEventListener('blur', function() {
+        const value = this.value.trim();
+        if (value && !validateYear(value)) {
+            this.classList.add('is-invalid');
+            if (!this.nextElementSibling || !this.nextElementSibling.classList.contains('invalid-feedback')) {
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = 'Please enter a valid year between 1990 and ' + (new Date().getFullYear() + 1);
                 this.parentNode.insertBefore(feedback, this.nextSibling);
             }
         } else {
@@ -557,6 +585,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const regNumber = document.getElementById('registration_number').value;
             if (regNumber && !validateRegistrationNumber(regNumber)) {
                 document.getElementById('registration_number').classList.add('is-invalid');
+                valid = false;
+            }
+            
+            // Validate year
+            const year = document.getElementById('vehicle_year').value;
+            if (year && !validateYear(year)) {
+                document.getElementById('vehicle_year').classList.add('is-invalid');
                 valid = false;
             }
         }
