@@ -122,6 +122,17 @@ def delete_submission(submission_id):
     with open(DATA_FILE, 'w') as f:
         json.dump(submissions, f)
 
+def normalize_registration_number(reg_number):
+    """Normalize registration number by removing spaces, hyphens and converting to uppercase"""
+    if not reg_number:
+        return reg_number
+    
+    # Remove spaces, hyphens and other special characters
+    reg_number = re.sub(r'[^a-zA-Z0-9]', '', reg_number)
+    
+    # Convert to uppercase
+    return reg_number.upper()
+
 # File handling functions
 def save_file_to_azure(file, filename, submission_id):
     if not AZURE_STORAGE_ENABLED:
@@ -197,7 +208,7 @@ def dashboard():
     submissions = get_submissions()
     
     # Apply filters if provided
-    reg_filter = request.args.get('reg', '').strip().upper()
+    reg_filter = normalize_registration_number(request.args.get('reg', ''))
     make_filter = request.args.get('make', '').strip().upper()
     date_from = request.args.get('date_from', '')
     date_to = request.args.get('date_to', '')
@@ -207,7 +218,8 @@ def dashboard():
         filtered_submissions = []
         for submission in submissions:
             # Registration filter
-            if reg_filter and reg_filter not in submission.get('registration_number', '').upper():
+            normalized_reg = normalize_registration_number(submission.get('registration_number', ''))
+            if reg_filter and reg_filter not in normalized_reg:
                 continue
                 
             # Make filter
@@ -274,7 +286,7 @@ def dashboard():
 def submit():
     if request.method == 'POST':
         # Process form data
-        registration_number = request.form.get('registration_number')
+        registration_number = normalize_registration_number(request.form.get('registration_number'))
         vehicle_make = request.form.get('vehicle_make')
         vehicle_model = request.form.get('vehicle_model')
         vehicle_year = request.form.get('vehicle_year')
@@ -401,7 +413,7 @@ def resubmit(submission_id):
         # Create new submission based on the original
         new_submission = {
             'id': new_submission_id,
-            'registration_number': submission['registration_number'],
+            'registration_number': normalize_registration_number(submission['registration_number']),
             'vehicle_make': submission['vehicle_make'],
             'vehicle_model': submission['vehicle_model'],
             'vehicle_year': submission['vehicle_year'],
